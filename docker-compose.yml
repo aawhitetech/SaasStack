@@ -1,0 +1,28 @@
+name: saas-stack
+
+services:
+  api:
+    image: "saas-stack:django"
+    ports:
+      - "8000:8000"
+    networks:
+      - saas-stack-net
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=your-secret-key
+      - DJANGO_ALLOWED_HOSTS=api localhost 127.0.0.1 [::1]
+      - CORS_ALLOW_ALL_ORIGINS=True
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000 http://127.0.0.1:3000
+  web:
+    image: "saas-stack:web_app"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - saas-stack-net
+    environment:
+      - API_BASE_URL=http://api:8000
+
+networks:
+  saas-stack-net:
