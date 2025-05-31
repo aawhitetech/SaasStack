@@ -1,18 +1,39 @@
 name: saas-stack
 
 services:
+  db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_DB: saasdb
+      POSTGRES_USER: saasuser
+      POSTGRES_PASSWORD: saaspass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - saas-stack-net
+
   api:
     image: "saas-stack:django"
     ports:
       - "8000:8000"
     networks:
       - saas-stack-net
+    depends_on:
+      - api
     environment:
       - DEBUG=True
       - SECRET_KEY=your-secret-key
       - DJANGO_ALLOWED_HOSTS=api localhost 127.0.0.1 [::1]
       - CORS_ALLOW_ALL_ORIGINS=True
       - CORS_ALLOWED_ORIGINS=http://localhost:3000 http://127.0.0.1:3000
+      - DB_ENGINE=postgres
+      - DATABASE_NAME=saasdb
+      - DATABASE_USER=saasuser
+      - DATABASE_PASSWORD=saaspass
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+
   web:
     image: "saas-stack:web_app"
     ports:
@@ -26,3 +47,6 @@ services:
 
 networks:
   saas-stack-net:
+
+volumes:
+  postgres_data:
