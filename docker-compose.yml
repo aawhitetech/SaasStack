@@ -14,7 +14,9 @@ services:
       - saas-stack-net
 
   api:
-    image: "saas-stack:django"
+    image: "saas-stack-django:latest"
+    build:
+      context: ./django
     ports:
       - "8000:8000"
     networks:
@@ -35,7 +37,9 @@ services:
       - DATABASE_PORT=5432
 
   web:
-    image: "saas-stack:web_app"
+    image: "saas-stack-web_app:latest"
+    build:
+      context: ./web_app
     ports:
       - "3000:3000"
     depends_on:
