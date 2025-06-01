@@ -5,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django.core.cache import cache
 
 
+from .tasks import send_user_created_email
 from main_app.serializers import GroupSerializer, UserSerializer
 
 
@@ -19,8 +20,13 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
         cache.delete("views.decorators.cache.cache_page./users/")
-        return super().create(request, *args, **kwargs)
+        if response.status_code == 201:
+            user = response.data
+            send_user_created_email.delay(user['email'], user['username'])
+        return response
+
 
     def update(self, request, *args, **kwargs):
         user_id = kwargs.get("pk")

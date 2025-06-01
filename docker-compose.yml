@@ -20,6 +20,20 @@ services:
     networks:
       - saas-stack-net
 
+  celery:
+    image: "saas-stack-django-celery:latest"
+    build:
+      context: ./django
+    command: celery -A main_project worker --loglevel=info
+    environment:  
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    depends_on:
+      - api
+      - redis
+    networks:
+      - saas-stack-net
+
   api:
     image: "saas-stack-django:latest"
     build:
@@ -43,7 +57,9 @@ services:
       - DATABASE_PASSWORD=saaspass
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
-      - REDIS_URL=redis://redis:6379/1
+      - CACHE_REDIS_URL=redis://redis:6379/2 
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
 
   web:
     image: "saas-stack-web_app:latest"
