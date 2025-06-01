@@ -59,6 +59,16 @@ else:  # fallback to SQLite
         }
     }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL", "redis://localhost:6379/1"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
 # Application definition
 
 INSTALLED_APPS = [

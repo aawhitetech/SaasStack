@@ -1,6 +1,13 @@
 name: saas-stack
 
 services:
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - saas-stack-net
   db:
     image: postgres:17
     restart: always
@@ -22,7 +29,8 @@ services:
     networks:
       - saas-stack-net
     depends_on:
-      - api
+      - db
+      - redis
     environment:
       - DEBUG=True
       - SECRET_KEY=your-secret-key
@@ -35,6 +43,7 @@ services:
       - DATABASE_PASSWORD=saaspass
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
 
   web:
     image: "saas-stack-web_app:latest"
