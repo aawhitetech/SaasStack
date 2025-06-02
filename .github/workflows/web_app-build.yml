@@ -1,0 +1,41 @@
+name: Build & Push Frontend to ECR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web_app/**'
+      - '.github/workflows/web_app-build.yml'
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+  IMAGE_NAME: saasstack-web_app
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        # uses: aws-actions/configure-aws-credentials@v2
+        # with:
+        #   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        #   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        #   aws-region: ${{ env.AWS_REGION }}
+        run: |
+          echo "Configuring AWS credentials..."
+
+      - name: Login to Amazon ECR
+        # uses: aws-actions/amazon-ecr-login@v2
+        run: |
+          echo "Logging in to Amazon ECR..."
+
+      - name: Build and Push Web App Image
+        run: |
+          docker build -t $ECR_REGISTRY/$IMAGE_NAME:latest ./web_app
+          echo "Pushing Docker image to ECR..."
+          echo "docker push $ECR_REGISTRY/$IMAGE_NAME:latest"
+        # docker push $ECR_REGISTRY/$IMAGE_NAME:latest
